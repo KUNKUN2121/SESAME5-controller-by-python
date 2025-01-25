@@ -4,17 +4,17 @@ from flask import Flask, jsonify
 from bluetooth_manager import BluetoothManager
 import threading
 import time
+import os
 
 app = Flask(__name__)
 
 # 設定値
-PRIVATE_KEY = 'df6f4b3ee7beb2f73ec4da77cd8b2604'
-SESAME5_ADDRESS = "D9:E9:B7:0B:73:F9" 
+PRIVATE_KEY = os.environ['PRIVATE_KEY']
+SESAME5_ADDRESS = os.environ['SESAME5_ADDRESS'] 
 
 manager = BluetoothManager(PRIVATE_KEY, SESAME5_ADDRESS)
 manager.connect()
 # manager.start_notification_loop()
-
 
 @app.route('/open', methods=['POST'])
 def open_lock():
