@@ -10,6 +10,8 @@ services:
     environment:
       - FLASK_ENV=production
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+      - PRIVATE_KEY=xxxx
+      - SESAME5_ADDRESS=xx:xx:xx:xx:xx:xx
     security_opt:
       - apparmor:unconfined
     network_mode: host
