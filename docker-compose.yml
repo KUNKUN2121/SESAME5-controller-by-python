@@ -1,0 +1,15 @@
+services:
+  sesame-app:
+    build: .
+    privileged: true
+    volumes:
+      - .:/app
+    devices:
+      - /var/run/dbus:/var/run/dbus
+    restart: always
+    environment:
+      - FLASK_ENV=production
+      - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+    security_opt:
+      - apparmor:unconfined
+    network_mode: host
