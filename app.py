@@ -5,10 +5,11 @@ from bluetooth_manager import BluetoothManager
 import threading
 import time
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 
-# 設定値
 PRIVATE_KEY = os.environ['PRIVATE_KEY']
 SESAME5_ADDRESS = os.environ['SESAME5_ADDRESS'] 
 
