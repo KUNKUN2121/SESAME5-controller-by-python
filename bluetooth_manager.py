@@ -131,15 +131,15 @@ class BluetoothManager:
     def command_worker(self):
         while True:
             if not self.is_connected():
-                print(f"{self.reconnect_delay} 秒後に再接続を試みます...")
+                print(f"Device not connected. Trying to connect in {self.reconnect_delay} seconds...")
                 time.sleep(self.reconnect_delay)
                 try:
                     self._connect()
-                    print("接続しました。")
-                    self.reconnect_delay = 5  # 初回に接続に失敗した場合は、次の試行まで5秒待つ
+                    print("Connection successful.")
+                    self.reconnect_delay = 5  # Reset delay to 5 seconds after a successful connection
                 except Exception as e:
-                    print(f"error: 接続失敗{e}")
-                    self.reconnect_delay = 60  # 接続に失敗した場合は、次の試行まで60秒待つ
+                    print(f"Connection attempt failed: {e}")
+                    self.reconnect_delay = 60  # If it fails, set the next attempt to 60 seconds
                 continue
 
             try:
@@ -154,7 +154,7 @@ class BluetoothManager:
                     self.peri.waitForNotifications(1.0)
 
             except (btle.BTLEDisconnectError, btle.BTLEInternalError) as e:
-                print(f"切断されました。: {e}. Will start reconnection attempts.")
+                print(f"Connection lost: {e}. Will start reconnection attempts.")
                 self._cleanup_connection()
                 self.reconnect_delay = 5  # For the first attempt after losing connection, wait 5 seconds
             except Exception as e:
@@ -177,11 +177,8 @@ class BluetoothManager:
         self.command_queue.put((command, args))
 
     def connect(self):
-        # The worker thread now handles the connection logic,
-        # so this method is just for initiating the first connection attempt.
         if not self.is_connected():
              print("Initial connection attempt triggered.")
-        # No need to queue a command, the worker will handle it.
 
     def _connect(self):
         with self.lock:
@@ -214,9 +211,20 @@ class BluetoothManager:
             
             self.connected = True
 
+            # リクエストを送信して、接続時にステータスを取得
+            self.enqueue_command(self._send_status_request)
+
         except Exception as e:
             self._cleanup_connection()
             raise e
+
+    def _send_status_request(self):
+        if not self.is_connected():
+            print("Not connected. Command 'status_request' ignored.")
+            return
+        status_request_command = bytes([0x08, 0x51])
+        print("Sending status request command.")
+        self.notify_delegate.send(self.peri, status_request_command, True)
 
     def disconnect(self):
         self.enqueue_command(self._cleanup_connection)
